@@ -20,5 +20,13 @@
     "node-sass": "^4.5.3",
     "npm-run-all": "^4.1.1",
     "postcss-cli": "^7.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darioamade/windnoise.git"
+  },
+  "bugs": {
+    "url": "https://github.com/darioamade/windnoise/issues"
+  },
+  "homepage": "https://github.com/darioamade/windnoise#readme"
 }

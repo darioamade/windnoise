@@ -1,81 +1,236 @@
 
-		$(document).ready(function() {
-    
-    
-    /* For the sticky navigation */
-			
-    $('.js--section-features').waypoint(function(direction) {
-        if (direction == "down") {
-            $('nav').addClass('sticky');
-        } else {
-            $('nav').removeClass('sticky');
-        }
-    }, {
-      offset: '60px;'
-    });
-    
-    
-    /* Scroll on buttons */
-			
-    $('.js--scroll-to-plans').click(function () {
-       $('html, body').animate({scrollTop: $('.js--section-plans').offset().top}, 1000); 
-    });
-    
-    $('.js--scroll-to-start').click(function () {
-       $('html, body').animate({scrollTop: $('.js--section-features').offset().top}, 1000); 
-    });
-    
-    
-    /* Navigation scroll */
-			
-    $(function() {
-      $('a[href*=#]:not([href=#])').click(function() {
-        if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-          var target = $(this.hash);
-          target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
-          if (target.length) {
-            $('html,body').animate({
-              scrollTop: target.offset().top
-            }, 3000);
-            return false;
-          }
-        }
-      });
-    });
-    
-    
-    /* Animations on scroll */
-			
-			
-    $('.js--wp-1').waypoint(function(direction) {
-        $('.js--wp-1').addClass('animated fadeIn');
-    }, {
-        offset: '50%'
-    });
-    
-    $('.js--wp-2').waypoint(function(direction) {
-        $('.js--wp-2').addClass('animated fadeOut');
-    }, {
-        offset: '50%'
-    });
-    
 
-    /* Mobile navigation */
-			
-    $('.js--nav-icon').click(function() {
-        var nav = $('.js--main-nav');
-        var icon = $('.js--nav-icon i');
-        
-		nav.slideToggle(200);
-        
-		if (icon.hasClass('ion-navicon-round')) {
-            icon.addClass('ion-close-round');
-            icon.removeClass('ion-navicon-round');
-        } else {
-            icon.addClass('ion-navicon-round');
-            icon.removeClass('ion-close-round');
-        }  
-      	
-    });
+function pageTransition() {
+  var tl = gsap.timeline();
+
+  tl.to("ul.transition li", {
+    duration: 0.5,
+    scaleY: 1,
+    transformOrigin: "bottom  left",
+    stagger: 0.2,
+  });
+  tl.to("ul.transition li", {
+    duration: 0.5,
+    scaleY: 0,
+    transformOrigin: "bottom  left",
+    stagger: 0.1,
+    delay: 0.1,
+  });
+}
+
+function contentAnimation(){
+
+  var tl = gsap.timeline();
+  tl.from('.left', { duration: 1.5, translateY: 50, opacity : 0})
+  tl.to("img", { clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)" });
+
+}
+
+
+function delay(n) {
+  n = n || 2000;
+  return new Promise((done) => {
+    setTimeout(() => {
+      done();
+    }, n);
+  });
+}
+
+barba.init({
+  sync: true,
+
+  transitions: [
+    {
+      async leave(data) {
+        const done = this.async();
+
+        pageTransition();
+        await delay(1500);
+        done();
+      },
+
+      async enter(data) {
+        contentAnimation();
+      },
+
+      async once(data) {
+        contentAnimation();
+      },
+    },
+  ],
 });
-	
+
+
+
+
+const musicContainer = document.getElementById("music-container");
+const playBtn = document.getElementById("play");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+
+const audio = document.getElementById("audio");
+const progress = document.getElementById("progress");
+const progressContainer = document.getElementById("progress-container");
+const title = document.getElementById("title");
+const cover = document.getElementById("cover");
+const currTime = document.querySelector("#currTime");
+const durTime = document.querySelector("#durTime");
+
+// Song titles
+const songs = ["aludra", "getaway", "locofunk"];
+
+// Keep track of song
+let songIndex = 2;
+
+// Initially load song details into DOM
+loadSong(songs[songIndex]);
+
+// Update song details
+function loadSong(song) {
+  title.innerText = song;
+  audio.src = `Resources/music/${song}.mp3`;
+  cover.src = `Resources/images/${song}.jpg`;
+}
+
+// Play song
+function playSong() {
+  musicContainer.classList.add("play");
+  playBtn.querySelector("i.fas").classList.remove("fa-play");
+  playBtn.querySelector("i.fas").classList.add("fa-pause");
+
+  audio.play();
+}
+
+// Pause song
+function pauseSong() {
+  musicContainer.classList.remove("play");
+  playBtn.querySelector("i.fas").classList.add("fa-play");
+  playBtn.querySelector("i.fas").classList.remove("fa-pause");
+
+  audio.pause();
+}
+
+// Previous song
+function prevSong() {
+  songIndex--;
+
+  if (songIndex < 0) {
+    songIndex = songs.length - 1;
+  }
+
+  loadSong(songs[songIndex]);
+
+  playSong();
+}
+
+// Next song
+function nextSong() {
+  songIndex++;
+
+  if (songIndex > songs.length - 1) {
+    songIndex = 0;
+  }
+
+  loadSong(songs[songIndex]);
+
+  playSong();
+}
+
+// Update progress bar
+function updateProgress(e) {
+  const { duration, currentTime } = e.srcElement;
+  const progressPercent = (currentTime / duration) * 100;
+  progress.style.width = `${progressPercent}%`;
+}
+
+// Set progress bar
+function setProgress(e) {
+  const width = this.clientWidth;
+  const clickX = e.offsetX;
+  const duration = audio.duration;
+
+  audio.currentTime = (clickX / width) * duration;
+}
+
+//get duration & currentTime for Time of song
+function DurTime(e) {
+  const { duration, currentTime } = e.srcElement;
+  var sec;
+  var sec_d;
+
+  // define minutes currentTime
+  let min = currentTime == null ? 0 : Math.floor(currentTime / 60);
+  min = min < 10 ? "0" + min : min;
+
+  // define seconds currentTime
+  function get_sec(x) {
+    if (Math.floor(x) >= 60) {
+      for (var i = 1; i <= 60; i++) {
+        if (Math.floor(x) >= 60 * i && Math.floor(x) < 60 * (i + 1)) {
+          sec = Math.floor(x) - 60 * i;
+          sec = sec < 10 ? "0" + sec : sec;
+        }
+      }
+    } else {
+      sec = Math.floor(x);
+      sec = sec < 10 ? "0" + sec : sec;
+    }
+  }
+
+  get_sec(currentTime, sec);
+
+  // change currentTime DOM
+  currTime.innerHTML = min + ":" + sec;
+
+  // define minutes duration
+  let min_d = isNaN(duration) === true ? "0" : Math.floor(duration / 60);
+  min_d = min_d < 10 ? "0" + min_d : min_d;
+
+  function get_sec_d(x) {
+    if (Math.floor(x) >= 60) {
+      for (var i = 1; i <= 60; i++) {
+        if (Math.floor(x) >= 60 * i && Math.floor(x) < 60 * (i + 1)) {
+          sec_d = Math.floor(x) - 60 * i;
+          sec_d = sec_d < 10 ? "0" + sec_d : sec_d;
+        }
+      }
+    } else {
+      sec_d = isNaN(duration) === true ? "0" : Math.floor(x);
+      sec_d = sec_d < 10 ? "0" + sec_d : sec_d;
+    }
+  }
+
+  // define seconds duration
+
+  get_sec_d(duration);
+
+  // change duration DOM
+  durTime.innerHTML = min_d + ":" + sec_d;
+}
+
+// Event listeners
+playBtn.addEventListener("click", () => {
+  const isPlaying = musicContainer.classList.contains("play");
+
+  if (isPlaying) {
+    pauseSong();
+  } else {
+    playSong();
+  }
+});
+
+// Change song
+prevBtn.addEventListener("click", prevSong);
+nextBtn.addEventListener("click", nextSong);
+
+// Time/song update
+audio.addEventListener("timeupdate", updateProgress);
+
+// Click on progress bar
+progressContainer.addEventListener("click", setProgress);
+
+// Song ends
+audio.addEventListener("ended", nextSong);
+
+// Time of song
+audio.addEventListener("timeupdate", DurTime);
